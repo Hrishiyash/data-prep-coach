@@ -1,0 +1,767 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>DataPrep — Analyst &amp; Data Scientist Interview Trainer</title>
+<style>
+  :root{
+    --ink: #1c2230;
+    --ink-soft: #565f70;
+    --ink-faint: #94a0b3;
+    --paper: #fbfaf7;
+    --panel: #ffffff;
+    --line: #e4e1d8;
+    --accent: #1d5c4a;
+    --accent-soft: #e4efe9;
+    --accent-deep: #0f3b2e;
+    --wrong: #9c3b34;
+    --wrong-soft: #f7e7e4;
+    --amber: #b3791a;
+    --amber-soft: #faf0db;
+    --mono: 'IBM Plex Mono', 'SFMono-Regular', Consolas, monospace;
+    --serif: 'Source Serif 4', Georgia, serif;
+    --sans: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+  }
+  *{box-sizing:border-box;}
+  body{
+    margin:0;
+    font-family:var(--sans);
+    background:var(--paper);
+    color:var(--ink);
+    line-height:1.5;
+  }
+  ::selection{background:var(--accent-soft);}
+
+  /* ---------- top bar ---------- */
+  .topbar{
+    border-bottom:1px solid var(--line);
+    background:var(--panel);
+    position:sticky; top:0; z-index:20;
+  }
+  .topbar-inner{
+    max-width:880px; margin:0 auto; padding:18px 24px;
+    display:flex; align-items:baseline; justify-content:space-between; gap:16px;
+  }
+  .brand{
+    font-family:var(--serif); font-size:21px; font-weight:600; letter-spacing:-0.01em;
+    color:var(--accent-deep); display:flex; align-items:baseline; gap:8px;
+  }
+  .brand .mark{
+    font-family:var(--mono); font-size:12px; background:var(--accent-deep); color:#fff;
+    padding:3px 6px; border-radius:3px; letter-spacing:0.02em; transform:translateY(-2px);
+  }
+  .progress-pill{
+    font-family:var(--mono); font-size:12px; color:var(--ink-soft);
+    border:1px solid var(--line); padding:5px 10px; border-radius:20px;
+    white-space:nowrap;
+  }
+
+  .wrap{max-width:880px; margin:0 auto; padding:36px 24px 80px;}
+
+  /* ---------- screens ---------- */
+  .screen{display:none;}
+  .screen.active{display:block;}
+
+  /* ---------- home screen ---------- */
+  .home-head{margin-bottom:32px;}
+  .home-eyebrow{
+    font-family:var(--mono); font-size:12px; text-transform:uppercase; letter-spacing:0.08em;
+    color:var(--accent); margin:0 0 10px;
+  }
+  .home-title{
+    font-family:var(--serif); font-size:32px; line-height:1.2; margin:0 0 12px; font-weight:600;
+    color:var(--ink);
+  }
+  .home-sub{font-size:15px; color:var(--ink-soft); max-width:620px; margin:0;}
+
+  .stats-row{
+    display:grid; grid-template-columns:repeat(3,1fr); gap:1px;
+    background:var(--line); border:1px solid var(--line); margin:28px 0 36px;
+  }
+  .stat-cell{background:var(--panel); padding:16px 18px;}
+  .stat-num{font-family:var(--serif); font-size:26px; font-weight:600; color:var(--accent-deep);}
+  .stat-lab{font-size:12px; color:var(--ink-faint); margin-top:2px;}
+
+  .section-grid{display:flex; flex-direction:column; gap:10px;}
+  .section-card{
+    border:1px solid var(--line); background:var(--panel); border-radius:3px;
+    padding:18px 20px; display:flex; align-items:center; gap:16px;
+    cursor:pointer; transition:border-color .15s ease, background .15s ease;
+    text-align:left; width:100%; font-family:var(--sans);
+  }
+  .section-card:hover{border-color:var(--accent); background:var(--accent-soft);}
+  .section-num{
+    font-family:var(--mono); font-size:13px; color:var(--ink-faint); width:24px; flex-shrink:0;
+  }
+  .section-icon{
+    width:38px; height:38px; border-radius:3px; flex-shrink:0;
+    display:flex; align-items:center; justify-content:center;
+    font-size:17px; color:var(--accent-deep); background:var(--accent-soft);
+  }
+  .section-body{flex:1; min-width:0;}
+  .section-name{font-size:16px; font-weight:600; margin:0 0 2px; color:var(--ink);}
+  .section-meta{font-size:13px; color:var(--ink-soft); margin:0;}
+  .section-mastery{
+    font-family:var(--mono); font-size:12px; color:var(--ink-faint); text-align:right; flex-shrink:0;
+    min-width:64px;
+  }
+  .section-mastery .pct{font-size:16px; font-weight:700; color:var(--accent-deep); display:block;}
+  .section-arrow{color:var(--ink-faint); font-size:18px; flex-shrink:0;}
+
+  /* ---------- difficulty pick screen ---------- */
+  .back-link{
+    font-family:var(--mono); font-size:12px; color:var(--ink-soft); cursor:pointer;
+    display:inline-flex; align-items:center; gap:6px; margin-bottom:24px; user-select:none;
+  }
+  .back-link:hover{color:var(--accent-deep);}
+  .diff-head{margin-bottom:28px;}
+  .diff-title{font-family:var(--serif); font-size:26px; font-weight:600; margin:0 0 6px;}
+  .diff-sub{font-size:14px; color:var(--ink-soft); margin:0;}
+  .diff-options{display:flex; flex-direction:column; gap:10px; margin-top:24px;}
+  .diff-card{
+    border:1px solid var(--line); border-radius:3px; padding:18px 20px;
+    cursor:pointer; background:var(--panel); transition:border-color .15s, background .15s;
+    display:flex; align-items:center; justify-content:space-between; gap:14px;
+  }
+  .diff-card:hover{border-color:var(--accent);}
+  .diff-left{display:flex; align-items:center; gap:14px;}
+  .diff-dot{width:10px; height:10px; border-radius:50%; flex-shrink:0;}
+  .diff-dot.easy{background:#5b8c5a;}
+  .diff-dot.moderate{background:var(--amber);}
+  .diff-dot.hard{background:var(--wrong);}
+  .diff-name{font-size:15px; font-weight:600; margin:0;}
+  .diff-desc{font-size:13px; color:var(--ink-soft); margin:2px 0 0;}
+  .diff-count{font-family:var(--mono); font-size:12px; color:var(--ink-faint);}
+  .diff-card.mixed{border-style:dashed;}
+
+  /* ---------- quiz screen ---------- */
+  .quiz-top{display:flex; align-items:center; justify-content:space-between; margin-bottom:20px; gap:16px;}
+  .quiz-tag{
+    font-family:var(--mono); font-size:11px; text-transform:uppercase; letter-spacing:0.06em;
+    padding:4px 9px; border-radius:3px; border:1px solid var(--line); color:var(--ink-soft);
+  }
+  .qbar{height:3px; background:var(--line); border-radius:2px; overflow:hidden; margin-bottom:28px;}
+  .qbar-fill{height:100%; background:var(--accent); transition:width .25s ease;}
+
+  .qcount{font-family:var(--mono); font-size:12px; color:var(--ink-faint); margin-bottom:8px;}
+  .qtext{font-family:var(--serif); font-size:21px; line-height:1.4; font-weight:600; margin:0 0 26px; color:var(--ink);}
+
+  .options{display:flex; flex-direction:column; gap:10px;}
+  .opt{
+    border:1px solid var(--line); border-radius:3px; padding:14px 16px;
+    display:flex; align-items:flex-start; gap:12px; cursor:pointer; background:var(--panel);
+    font-size:15px; transition:border-color .12s, background .12s;
+    text-align:left;
+  }
+  .opt:hover{border-color:var(--accent);}
+  .opt .letter{
+    font-family:var(--mono); font-size:12px; color:var(--ink-faint); border:1px solid var(--line);
+    width:22px; height:22px; border-radius:50%; display:flex; align-items:center; justify-content:center;
+    flex-shrink:0; margin-top:1px;
+  }
+  .opt.selected-correct{border-color:var(--accent); background:var(--accent-soft);}
+  .opt.selected-correct .letter{background:var(--accent); color:#fff; border-color:var(--accent);}
+  .opt.selected-wrong{border-color:var(--wrong); background:var(--wrong-soft);}
+  .opt.selected-wrong .letter{background:var(--wrong); color:#fff; border-color:var(--wrong);}
+  .opt.reveal-correct{border-color:var(--accent);}
+  .opt.disabled{cursor:default;}
+  .opt.disabled:hover{border-color:inherit;}
+
+  .explain-panel{
+    margin-top:22px; border:1px solid var(--line); border-left:3px solid var(--accent);
+    background:var(--panel); padding:18px 20px; border-radius:0 3px 3px 0;
+  }
+  .explain-panel.is-wrong{border-left-color:var(--wrong);}
+  .explain-head{
+    font-family:var(--mono); font-size:11px; text-transform:uppercase; letter-spacing:0.06em;
+    margin:0 0 8px; color:var(--accent-deep);
+  }
+  .explain-panel.is-wrong .explain-head{color:var(--wrong);}
+  .explain-right{font-size:14.5px; margin:0 0 14px; color:var(--ink);}
+  .why-others{margin:0; padding:0; list-style:none; display:flex; flex-direction:column; gap:8px;}
+  .why-others li{
+    font-size:13.5px; color:var(--ink-soft); padding-left:16px; position:relative; line-height:1.5;
+  }
+  .why-others li::before{content:"–"; position:absolute; left:0; color:var(--ink-faint);}
+  .why-others .opt-label{font-family:var(--mono); font-size:11px; color:var(--ink-faint); margin-right:4px;}
+
+  .quiz-actions{display:flex; justify-content:flex-end; margin-top:24px;}
+  .btn{
+    font-family:var(--sans); font-size:14px; font-weight:600; padding:11px 22px;
+    border-radius:3px; border:1px solid var(--accent-deep); background:var(--accent-deep); color:#fff;
+    cursor:pointer; transition:opacity .12s;
+  }
+  .btn:hover{opacity:0.88;}
+  .btn:disabled{opacity:0.35; cursor:not-allowed;}
+  .btn.ghost{background:transparent; color:var(--accent-deep);}
+
+  /* ---------- results screen ---------- */
+  .result-head{text-align:left; margin-bottom:8px;}
+  .result-score{
+    font-family:var(--serif); font-size:54px; font-weight:600; color:var(--accent-deep); line-height:1;
+  }
+  .result-label{font-size:14px; color:var(--ink-soft); margin-top:6px;}
+  .result-msg{font-size:15px; margin:18px 0 30px; color:var(--ink); max-width:560px;}
+  .review-list{display:flex; flex-direction:column; gap:10px; margin-bottom:32px;}
+  .review-item{
+    border:1px solid var(--line); border-radius:3px; padding:13px 16px;
+    display:flex; align-items:flex-start; gap:12px; font-size:13.5px;
+  }
+  .review-mark{font-family:var(--mono); font-size:13px; flex-shrink:0; width:18px; text-align:center; margin-top:1px;}
+  .review-mark.ok{color:var(--accent);}
+  .review-mark.no{color:var(--wrong);}
+  .review-q{color:var(--ink-soft);}
+  .result-actions{display:flex; gap:10px;}
+
+  @media (max-width:600px){
+    .home-title{font-size:26px;}
+    .stats-row{grid-template-columns:1fr; }
+    .quiz-top{flex-wrap:wrap;}
+    .qtext{font-size:18px;}
+  }
+</style>
+</head>
+<body>
+
+<div class="topbar">
+  <div class="topbar-inner">
+    <div class="brand"><span class="mark">DS</span>DataPrep</div>
+    <div class="progress-pill" id="globalProgress">0 / 78 attempted</div>
+  </div>
+</div>
+
+<div class="wrap">
+
+  <!-- HOME -->
+  <div class="screen active" id="screen-home">
+    <div class="home-head">
+      <p class="home-eyebrow">Interview trainer</p>
+      <h1 class="home-title">Get interview-ready for Data Analyst &amp; Data Scientist roles</h1>
+      <p class="home-sub">Six core topic areas, three difficulty tiers each. Every question — right or wrong — comes with a breakdown of why each option is correct or incorrect, so every attempt builds your understanding, not just your score.</p>
+    </div>
+
+    <div class="stats-row">
+      <div class="stat-cell"><div class="stat-num" id="statAttempted">0</div><div class="stat-lab">questions attempted</div></div>
+      <div class="stat-cell"><div class="stat-num" id="statAccuracy">—</div><div class="stat-lab">overall accuracy</div></div>
+      <div class="stat-cell"><div class="stat-num" id="statStreak">0</div><div class="stat-lab">best correct streak</div></div>
+    </div>
+
+    <div class="section-grid" id="sectionGrid"></div>
+  </div>
+
+  <!-- DIFFICULTY PICKER -->
+  <div class="screen" id="screen-difficulty">
+    <div class="back-link" onclick="goHome()">&larr; all topics</div>
+    <div class="diff-head">
+      <h2 class="diff-title" id="diffSectionTitle"></h2>
+      <p class="diff-sub">Pick a difficulty, or run a mixed set across all three.</p>
+    </div>
+    <div class="diff-options" id="diffOptions"></div>
+  </div>
+
+  <!-- QUIZ -->
+  <div class="screen" id="screen-quiz">
+    <div class="quiz-top">
+      <div class="back-link" onclick="confirmExitQuiz()">&larr; exit</div>
+      <span class="quiz-tag" id="quizTag"></span>
+    </div>
+    <div class="qbar"><div class="qbar-fill" id="qbarFill" style="width:0%"></div></div>
+    <div class="qcount" id="qcount"></div>
+    <h2 class="qtext" id="qtext"></h2>
+    <div class="options" id="options"></div>
+    <div class="explain-panel" id="explainPanel" style="display:none;">
+      <p class="explain-head" id="explainHead">Why this is correct</p>
+      <p class="explain-right" id="explainRight"></p>
+      <ul class="why-others" id="explainOthers"></ul>
+    </div>
+    <div class="quiz-actions">
+      <button class="btn" id="nextBtn" disabled onclick="nextQuestion()">Next question</button>
+    </div>
+  </div>
+
+  <!-- RESULTS -->
+  <div class="screen" id="screen-results">
+    <div class="result-head">
+      <div class="result-score" id="resultScore">0/0</div>
+      <p class="result-label" id="resultLabel"></p>
+    </div>
+    <p class="result-msg" id="resultMsg"></p>
+    <div class="review-list" id="reviewList"></div>
+    <div class="result-actions">
+      <button class="btn" onclick="retrySameSet()">Try this set again</button>
+      <button class="btn ghost" onclick="goHome()">Back to topics</button>
+    </div>
+  </div>
+
+</div>
+
+<script>const QUESTION_BANK = {
+sql: {
+  label: "SQL",
+  icon: "ti-database",
+  color: "c-blue",
+  questions: [
+    {difficulty:"easy", q:"Which SQL clause is used to filter rows BEFORE any grouping happens?", options:["HAVING","WHERE","GROUP BY","ORDER BY"], correct:1,
+      explain:{right:"WHERE filters individual rows before they are grouped. The engine evaluates WHERE first, then forms groups from whatever rows survive.", wrong:["HAVING runs after grouping, so it filters groups, not raw rows — using it here would still work logically in some cases but it's the wrong tool and is slower.","GROUP BY only forms groups; it never filters anything on its own.","ORDER BY only changes display order of the final result; it does not remove rows."]}},
+    {difficulty:"easy", q:"What does the SQL `DISTINCT` keyword do?", options:["Sorts the result set","Removes duplicate rows from the result","Renames a column","Joins two tables"], correct:1,
+      explain:{right:"DISTINCT collapses duplicate rows in the output down to one copy each, based on every selected column's values.", wrong:["Sorting is the job of ORDER BY, not DISTINCT.","Renaming columns is done with AS (aliasing), unrelated to DISTINCT.","Joining tables needs a JOIN clause; DISTINCT only deduplicates an existing result."]}},
+    {difficulty:"easy", q:"Which JOIN returns all rows from the left table, and matched rows from the right table (NULLs where there's no match)?", options:["INNER JOIN","RIGHT JOIN","LEFT JOIN","CROSS JOIN"], correct:2,
+      explain:{right:"LEFT JOIN keeps every row from the left table regardless of a match, filling unmatched right-side columns with NULL.", wrong:["INNER JOIN only keeps rows that match in both tables, dropping unmatched left rows.","RIGHT JOIN does the mirror opposite — keeps all right table rows.","CROSS JOIN produces a full cartesian product of both tables, ignoring matching keys entirely."]}},
+    {difficulty:"easy", q:"Which aggregate function would you use to count the number of non-NULL values in a column?", options:["SUM()","COUNT()","AVG()","MAX()"], correct:1,
+      explain:{right:"COUNT() counts the number of rows where the specified column is not NULL (COUNT(*) counts all rows including NULLs).", wrong:["SUM() adds up numeric values; it doesn't count rows.","AVG() computes the mean, not a row count.","MAX() returns the largest value in the column, not how many values exist."]}},
+    {difficulty:"easy", q:"What is the correct order of execution (logical, not written) for a basic SQL query?", options:["SELECT → FROM → WHERE → GROUP BY","FROM → WHERE → GROUP BY → HAVING → SELECT → ORDER BY","WHERE → SELECT → FROM → ORDER BY","GROUP BY → FROM → WHERE → SELECT"], correct:1,
+      explain:{right:"SQL is written as SELECT...FROM...WHERE, but logically executes FROM first (build the table), then WHERE (filter rows), GROUP BY (group), HAVING (filter groups), SELECT (pick columns), then ORDER BY (sort) last.", wrong:["This puts SELECT before FROM in execution order, which is backwards — you can't select columns from a table that hasn't been resolved yet.","WHERE can't run before FROM identifies the source table.","GROUP BY needs a table to group, so FROM must come first."]}},
+    {difficulty:"moderate", q:"You need to find employees who earn more than the average salary in their own department. Which approach is correct?", options:["A correlated subquery comparing salary to AVG(salary) for that employee's department","A simple WHERE salary > AVG(salary) with no subquery","A CROSS JOIN of the employee table with itself","Sorting by salary DESC and taking the top half"], correct:0,
+      explain:{right:"A correlated subquery recomputes the department average for each outer row's department, e.g. WHERE salary > (SELECT AVG(salary) FROM employees e2 WHERE e2.dept = e1.dept). This correctly compares each employee against their own department's average.", wrong:["You cannot use an aggregate like AVG() directly in a WHERE clause without a subquery — WHERE operates on individual rows, not aggregated groups.","A CROSS JOIN multiplies rows without any per-department logic; it doesn't compute department-specific averages by itself.","Sorting and taking a static top fraction has nothing to do with department-relative averages and would give a wrong, fixed-size answer."]}},
+    {difficulty:"moderate", q:"What's the key difference between RANK() and DENSE_RANK() window functions?", options:["RANK() is faster to compute","DENSE_RANK() skips numbers after ties, RANK() does not","RANK() skips numbers after ties, DENSE_RANK() does not","They are functionally identical"], correct:2,
+      explain:{right:"RANK() leaves gaps after ties (e.g., 1,2,2,4), while DENSE_RANK() assigns consecutive integers with no gaps (e.g., 1,2,2,3). This matters whenever you need a clean sequential ranking.", wrong:["Performance differences between them are negligible in practice and not the defining distinction tested here.","This describes the reverse of what actually happens.","They behave identically only when there are no ties at all; with ties their outputs diverge."]}},
+    {difficulty:"moderate", q:"Which clause would you use to filter groups after a GROUP BY, e.g. only show departments with more than 5 employees?", options:["WHERE COUNT(*) > 5","HAVING COUNT(*) > 5","GROUP BY COUNT(*) > 5","FILTER COUNT(*) > 5"], correct:1,
+      explain:{right:"HAVING filters aggregated groups after GROUP BY has run, so it can reference aggregate functions like COUNT(*) directly.", wrong:["WHERE executes before grouping and cannot use aggregate functions like COUNT(*) in its condition — this would throw an error in most databases.","GROUP BY only defines how rows are grouped; it can't itself act as a filter condition.","FILTER is not a standalone SQL clause for this purpose in standard SQL grouping syntax."]}},
+    {difficulty:"moderate", q:"What does a self-join typically help you do?", options:["Join a table to itself to compare rows within the same table","Join a table to a view","Duplicate a table's structure","Join more than two unrelated tables in one query"], correct:0,
+      explain:{right:"A self-join joins a table to itself (using two aliases) so you can compare rows against other rows in the same table, e.g. finding employees and their managers in one employee table.", wrong:["Joining a table to a view is just a regular join, not specifically a self-join.","Self-joins don't duplicate table structure; they reuse the same data with two aliases in one query.","Joining several unrelated tables is a normal multi-table join, not what defines a self-join."]}},
+    {difficulty:"moderate", q:"In PostgreSQL, what does COALESCE(column, 0) do?", options:["Rounds the column to 0 decimal places","Returns 0 if the column is NULL, otherwise returns the column's value","Deletes rows where the column is 0","Converts the column to text"], correct:1,
+      explain:{right:"COALESCE returns the first non-NULL value from its argument list, so COALESCE(column, 0) substitutes 0 wherever the column would otherwise be NULL — commonly used before aggregations or arithmetic to avoid NULL propagation.", wrong:["Rounding is done with ROUND(), unrelated to COALESCE.","COALESCE doesn't delete anything; it only substitutes a display/calculation value.","Type conversion is done with CAST() or ::text, not COALESCE."]}},
+    {difficulty:"hard", q:"You want the running (cumulative) total of sales ordered by date, per region. Which is the correct window function syntax?", options:["SUM(sales) OVER (PARTITION BY region ORDER BY date)","SUM(sales) GROUP BY region ORDER BY date","SUM(sales) PARTITION BY region","AVG(sales) OVER (ORDER BY date) PARTITION BY region"], correct:0,
+      explain:{right:"SUM(sales) OVER (PARTITION BY region ORDER BY date) computes, for each row, the cumulative sum of sales within that region up to the current date — this is the standard running-total window function pattern.", wrong:["GROUP BY collapses rows into one row per group; it cannot produce a row-by-row running total alongside individual rows.","PARTITION BY cannot follow SUM() without the OVER() clause — it's invalid syntax on its own.","AVG() instead of SUM() would compute a running average, not a running total, and the clause order shown is syntactically invalid."]}},
+    {difficulty:"hard", q:"What is the main risk of using a non-SARGable condition like WHERE YEAR(order_date) = 2025 on a large table?", options:["It returns incorrect results","It prevents the database from using an index on order_date, forcing a full table scan","It only works in PostgreSQL","It automatically creates a new index"], correct:1,
+      explain:{right:"Wrapping a column in a function (YEAR()) makes the predicate non-SARGable: the optimizer can't use a standard index on order_date because it would have to evaluate YEAR() on every row first, forcing a full table/index scan instead of a fast index seek.", wrong:["The results are still logically correct — it's a performance problem, not a correctness one.","This SARGability issue applies across most relational databases (MySQL, SQL Server, PostgreSQL), not just one.","SQL never auto-creates indexes in response to a slow query; that requires manual or DBA intervention."]}},
+    {difficulty:"hard", q:"In a query with multiple LEFT JOINs, why might you unexpectedly get duplicated rows in your result?", options:["LEFT JOIN always duplicates rows","One of the joined tables has a one-to-many relationship with the base table, so each match multiplies the base row","DISTINCT was forgotten in the SELECT","The database has a bug"], correct:1,
+      explain:{right:"If a joined table has multiple matching rows per key (a one-to-many relationship), each match produces a separate output row, multiplying the base table's rows by however many matches exist — this is expected relational behavior, not an error.", wrong:["LEFT JOIN doesn't inherently duplicate — it only does so when the join condition matches multiple rows on the joined side.","Adding DISTINCT can mask the symptom but doesn't address the underlying one-to-many cause, and isn't always the right fix.","This is standard, well-documented join behavior, not a database bug."]}},
+    {difficulty:"hard", q:"What's the main difference between UNION and UNION ALL?", options:["UNION ALL is slower because it keeps duplicates","UNION removes duplicate rows across the combined result; UNION ALL keeps all rows including duplicates","UNION only works on numeric columns","UNION ALL sorts the result, UNION does not"], correct:1,
+      explain:{right:"UNION performs an implicit deduplication step across the combined rows from both queries, which costs extra processing. UNION ALL simply concatenates all rows from both queries without checking for duplicates, making it faster.", wrong:["UNION ALL is actually faster, not slower, precisely because it skips the deduplication step.","Both work on any compatible column types, not just numeric ones.","Neither UNION nor UNION ALL guarantees sorted output by default; you'd still need an explicit ORDER BY."]}},
+  ]
+},
+python: {
+  label: "Python for Data",
+  icon: "ti-brand-python",
+  color: "c-teal",
+  questions: [
+    {difficulty:"easy", q:"In pandas, which method gives you a quick summary of a DataFrame's column types and non-null counts?", options:["df.describe()","df.info()","df.head()","df.shape"], correct:1,
+      explain:{right:"df.info() prints the number of entries, column names, dtype of each column, and count of non-null values — exactly what you need for a fast structural overview.", wrong:["df.describe() gives statistical summaries (mean, std, percentiles) for numeric columns, not dtypes or null counts.","df.head() just previews the first few rows of actual data, not metadata about types or nulls.","df.shape only returns (rows, columns) as a tuple — no type or null information."]}},
+    {difficulty:"easy", q:"What does `df.dropna()` do by default?", options:["Removes columns with any missing values","Removes rows that contain at least one NaN value","Fills missing values with 0","Removes duplicate rows"], correct:1,
+      explain:{right:"By default, dropna() drops any row (axis=0) that has at least one NaN value in it. You'd need axis=1 to drop columns instead.", wrong:["Dropping columns requires explicitly passing axis=1; the default targets rows.","Filling values is done with fillna(), a completely different method.","Removing duplicates is the job of drop_duplicates(), unrelated to NaN handling."]}},
+    {difficulty:"easy", q:"Which Python data structure is mutable: list or tuple?", options:["Tuple","List","Both are mutable","Neither is mutable"], correct:1,
+      explain:{right:"Lists can be modified after creation (append, remove, change items), making them mutable. Tuples are immutable once created.", wrong:["Tuples cannot be changed after creation — attempting to assign to an index raises a TypeError.","Only one of the two is mutable, not both.","Lists are clearly mutable, so 'neither' is incorrect."]}},
+    {difficulty:"easy", q:"What does `len()` return when called on a pandas DataFrame?", options:["The number of columns","The number of rows","The total number of cells","The memory usage"], correct:1,
+      explain:{right:"len(df) returns the number of rows in the DataFrame, equivalent to df.shape[0].", wrong:["Column count is given by len(df.columns) or df.shape[1], not len(df) directly.","Total cell count would require rows multiplied by columns, which len() does not compute.","Memory usage needs df.memory_usage(), a separate method entirely."]}},
+    {difficulty:"easy", q:"In NumPy, what does `np.array([1,2,3]) * 2` produce?", options:["An error, since you can't multiply an array by a scalar","[1,2,3,1,2,3] (the list repeated twice)","[2,4,6] (each element multiplied by 2)","A single value: 6"], correct:2,
+      explain:{right:"NumPy arrays support element-wise broadcasting, so multiplying by a scalar multiplies every element individually, giving [2,4,6].", wrong:["NumPy arrays are explicitly designed to support scalar multiplication — this is one of NumPy's core features over plain Python lists.","List repetition behavior ([1,2,3]*2 in plain Python) does not apply to NumPy arrays; this is a common point of confusion between lists and arrays.","Summing isn't what * does — that would require .sum() afterward."]}},
+    {difficulty:"moderate", q:"What's the difference between `.loc[]` and `.iloc[]` in pandas?", options:["They are interchangeable","`.loc[]` selects by label/index name, `.iloc[]` selects by integer position","`.loc[]` is for rows only, `.iloc[]` is for columns only","`.iloc[]` is deprecated in favor of `.loc[]`"], correct:1,
+      explain:{right:"`.loc[]` uses the DataFrame's actual index labels (which could be strings, dates, or custom values) for selection, while `.iloc[]` always uses zero-based integer positions regardless of what the labels are.", wrong:["They produce different results whenever the index isn't a simple 0,1,2... range, so they're not interchangeable in general.","Both can select rows and columns; the distinction is label-based vs position-based access, not row vs column.","`.iloc[]` is fully supported and commonly used; it isn't deprecated."]}},
+    {difficulty:"moderate", q:"You run `df.groupby('region')['sales'].mean()`. What does this return?", options:["The overall mean of the sales column","A Series with the mean sales value for each unique region","A DataFrame with every original row, unchanged","An error because groupby requires two columns"], correct:1,
+      explain:{right:"groupby('region') splits the DataFrame into groups by unique region values, and ['sales'].mean() computes the average sales within each group, returning a Series indexed by region.", wrong:["This computes per-group means, not one single overall average across all rows.","groupby() reduces rows to one summary value per group; it does not return all original rows untouched.","groupby() works perfectly fine on a single grouping column; two columns are not required."]}},
+    {difficulty:"moderate", q:"What does `train_test_split(X, y, test_size=0.2, random_state=42)` from scikit-learn do?", options:["Splits data into 20% train and 80% test","Splits data into 80% train and 20% test, with a fixed random seed for reproducibility","Removes 20% of the data permanently","Trains a model and tests it automatically"], correct:1,
+      explain:{right:"test_size=0.2 allocates 20% of the data to the test set and the remaining 80% to training. random_state=42 fixes the random shuffling seed so the same split is reproduced every time the code runs.", wrong:["This reverses the actual proportions — test_size is the test fraction, not the train fraction.","No data is deleted; it's only partitioned into two separate sets that are both still usable.","train_test_split only divides data — it doesn't train or evaluate any model itself."]}},
+    {difficulty:"moderate", q:"What is a list comprehension equivalent to `[x**2 for x in range(5) if x % 2 == 0]`?", options:["Squares of all numbers from 0 to 4","Squares of only the even numbers from 0 to 4: [0, 4, 16]","All even numbers from 0 to 4: [0, 2, 4]","An error due to invalid syntax"], correct:1,
+      explain:{right:"The comprehension iterates x over 0-4, keeps only values where x % 2 == 0 (0, 2, 4), and squares each, giving [0, 4, 16].", wrong:["This ignores the if condition, which filters out odd numbers before squaring.","This forgets to apply the x**2 transformation — it returns the filtered numbers unsquared.","This is valid, common Python syntax — list comprehensions with conditional filtering are a standard idiom."]}},
+    {difficulty:"hard", q:"Why might `for i in range(len(df)): df.loc[i, 'col'] = some_function(df.loc[i, 'col'])` be considered bad practice in pandas?", options:["It's actually the fastest way to transform a column","It's slow and unidiomatic; vectorized operations like `df['col'].apply()` or direct vectorized math are far faster", "It will throw a syntax error","It modifies the DataFrame's index permanently"], correct:1,
+      explain:{right:"Row-by-row Python loops over a DataFrame are slow because they bypass pandas' optimized, vectorized (often C-level) operations. Using df['col'].apply(some_function) or, better, fully vectorized NumPy/pandas operations processes the whole column at once and is typically much faster.", wrong:["This loop pattern is one of the slowest ways to operate on a DataFrame, not the fastest — it's a well-known anti-pattern.","The syntax is valid Python/pandas; the issue is performance and style, not correctness.","This loop only changes the column's values, not the DataFrame's index structure."]}},
+    {difficulty:"hard", q:"What's the practical difference between `df.copy()` and simply doing `df2 = df`?", options:["No difference; both create independent copies","`df2 = df` creates a reference to the same object — changes to df2 affect df; `.copy()` creates an independent copy", "`.copy()` is slower and rarely used", "`df2 = df` only works for Series, not DataFrames"], correct:1,
+      explain:{right:"In Python, `df2 = df` just binds a new variable name to the same underlying DataFrame object — mutating df2 in place will also change df. `df.copy()` allocates a genuinely separate object, so changes to one don't affect the other.", wrong:["There's a real and important difference — this is a frequent source of subtle bugs for pandas beginners.","`.copy()` does have a small memory/time cost but is the correct choice whenever true independence is needed; it isn't 'rarely used'.","Both assignment-by-reference and .copy() apply identically to Series and DataFrames."]}},
+    {difficulty:"hard", q:"In a machine learning pipeline, why is it important to fit a `StandardScaler` only on the training data, not the full dataset?", options:["Fitting on the full dataset is required for accuracy","Fitting on the full dataset leaks test set information into training, giving an overly optimistic performance estimate (data leakage)","StandardScaler can only be fit on training data due to a library restriction","It doesn't matter; scaling order has no effect"], correct:1,
+      explain:{right:"If you fit the scaler on the entire dataset (including test data) before splitting, the training process implicitly 'sees' statistics (mean, std) derived from the test set. This data leakage inflates validation performance and gives a misleadingly optimistic sense of how the model will generalize.", wrong:["Fitting on the full dataset isn't required and is actually the wrong approach due to leakage.","There's no technical library restriction preventing you from fitting on any data; the concern is methodological, not a coding limitation.","Scaling order has a real and well-documented effect on evaluation validity — this is a textbook leakage scenario."]}},
+  ]
+},
+stats: {
+  label: "Statistics & Probability",
+  icon: "ti-chart-histogram",
+  color: "c-coral",
+  questions: [
+    {difficulty:"easy", q:"What does the mean of a dataset represent?", options:["The middle value when sorted","The most frequently occurring value","The average of all values","The range between max and min"], correct:2,
+      explain:{right:"The mean is calculated by summing all values and dividing by the count of values — it's the arithmetic average.", wrong:["The middle value when sorted is the median, a different measure of central tendency.","The most frequent value is the mode.","Range is max minus min, a measure of spread, not central tendency."]}},
+    {difficulty:"easy", q:"Which measure of central tendency is least affected by extreme outliers?", options:["Mean","Median","Mode","Standard deviation"], correct:1,
+      explain:{right:"The median only depends on the middle value's position after sorting, so a single extreme outlier barely shifts it. The mean, by contrast, is pulled heavily toward outliers since it factors in every value's magnitude.", wrong:["The mean is highly sensitive to outliers because extreme values directly affect the sum used to calculate it.","Mode just reflects the most frequent value and isn't a robust general-purpose alternative to mean/median for this comparison — and can be undefined or unstable too.","Standard deviation is a measure of spread, not central tendency, and is also outlier-sensitive."]}},
+    {difficulty:"easy", q:"In a normal distribution, approximately what percentage of data falls within 1 standard deviation of the mean?", options:["50%","68%","95%","99.7%"], correct:1,
+      explain:{right:"This is the empirical (68-95-99.7) rule for normal distributions: about 68% of data falls within ±1 SD, 95% within ±2 SD, and 99.7% within ±3 SD.", wrong:["50% would correspond to the interquartile range area roughly between the 25th and 75th percentiles, not ±1 SD.","95% corresponds to ±2 standard deviations, not ±1.","99.7% corresponds to ±3 standard deviations, not ±1."]}},
+    {difficulty:"easy", q:"What is the range of values a correlation coefficient (Pearson's r) can take?", options:["0 to 1","-1 to 1","-100 to 100","0 to infinity"], correct:1,
+      explain:{right:"Pearson's r ranges from -1 (perfect negative linear relationship) to +1 (perfect positive linear relationship), with 0 meaning no linear relationship.", wrong:["0 to 1 would exclude negative correlations entirely, which are a valid and common outcome.","Correlation is a standardized measure, not a percentage-like or unbounded scale.","Correlation is bounded, not open-ended toward infinity."]}},
+    {difficulty:"easy", q:"What does a p-value of 0.03 typically suggest in a hypothesis test using the common 0.05 significance threshold?", options:["There's a 3% chance the null hypothesis is true","The result is unlikely to occur by random chance alone under the null hypothesis, so you'd reject the null hypothesis","The effect size is 3%","The test is invalid"], correct:1,
+      explain:{right:"A p-value of 0.03 means that if the null hypothesis were true, you'd see a result this extreme (or more) only 3% of the time by chance. Since this is below the 0.05 threshold, you'd reject the null hypothesis as statistically significant.", wrong:["A p-value is not the probability that the null hypothesis is true — that's a common and important misinterpretation; p-values are about the data given the null, not the null given the data.","The p-value says nothing about effect magnitude — that's a separate concept (effect size), and a small p-value can come with a tiny effect.","A low p-value doesn't mean the test itself is invalid; it's a normal, interpretable result."]}},
+    {difficulty:"moderate", q:"What is the main difference between Type I and Type II error in hypothesis testing?", options:["Type I is failing to reject a false null hypothesis; Type II is rejecting a true null hypothesis","Type I is rejecting a true null hypothesis (false positive); Type II is failing to reject a false null hypothesis (false negative)","They are the same thing with different names","Type I only applies to t-tests"], correct:1,
+      explain:{right:"Type I error (false positive) means you reject a null hypothesis that was actually true — concluding there's an effect when there isn't. Type II error (false negative) means you fail to reject a null hypothesis that was actually false — missing a real effect.", wrong:["This swaps the two definitions exactly backwards.","They describe opposite kinds of mistakes and have different real-world consequences and control mechanisms (alpha vs beta).","Both error types are general concepts applicable to any hypothesis test, not specific to t-tests."]}},
+    {difficulty:"moderate", q:"You compute a 95% confidence interval for a mean as [48, 52]. What's the correct interpretation?", options:["There's a 95% chance the true population mean is between 48 and 52","If we repeated this sampling process many times, about 95% of such intervals would contain the true population mean","95% of the data falls between 48 and 52","The sample mean has a 95% chance of being correct"], correct:1,
+      explain:{right:"A confidence interval's correct frequentist interpretation is about the long-run procedure: if you repeated the sampling and interval-construction process many times, about 95% of the resulting intervals would contain the true (fixed) population parameter. The interval itself either does or doesn't contain it — there's no probability attached to this one specific interval.", wrong:["This is a very common but technically incorrect interpretation — the true mean is a fixed (if unknown) value, not a random variable with a probability distribution under the classic frequentist framework.","This confuses a confidence interval for the mean with a range describing where the raw data points themselves fall — a different concept (more like a prediction interval or percentile range).","The sample mean is what it is — calculated correctly or not — confidence intervals quantify uncertainty about the population parameter, not 'correctness' of the sample statistic."]}},
+    {difficulty:"moderate", q:"What does it mean if two variables have a correlation coefficient close to 0?", options:["They are definitely unrelated in every way","There is little to no linear relationship between them, though a non-linear relationship could still exist","One variable causes the other not to change","The data must contain errors"], correct:1,
+      explain:{right:"Pearson correlation only captures linear relationships. A coefficient near 0 means no meaningful linear association, but the variables could still have a strong non-linear relationship (e.g., U-shaped) that correlation simply doesn't detect.", wrong:["Correlation near 0 doesn't rule out all relationships — only linear ones; this is a classic statistics trap (e.g., y = x² has near-zero linear correlation with x over a symmetric range despite a perfect relationship).","Correlation, even when strong, never implies causation by itself, and near-zero correlation says nothing about causal mechanisms either way.","Low correlation is a normal, valid statistical outcome and has no inherent connection to data quality issues."]}},
+    {difficulty:"moderate", q:"In A/B testing, what is 'statistical power'?", options:["The probability of detecting a true effect when one exists","The probability of making a Type I error","The total sample size needed","The strength of the correlation between variables"], correct:0,
+      explain:{right:"Statistical power is the probability that a test correctly rejects the null hypothesis when the alternative hypothesis is actually true — in other words, the probability of detecting a real effect when it exists. It equals 1 minus the Type II error rate (beta).", wrong:["Type I error probability is alpha (the significance level), a separate and predetermined concept, not power.","Sample size influences power but isn't itself the definition of power — power is the probability outcome that sample size, effect size, and alpha jointly determine.","Power is unrelated to correlation strength; it's a property of a hypothesis test's design, not of an observed relationship."]}},
+    {difficulty:"hard", q:"In a regression with multiple predictors, what problem does a high VIF (Variance Inflation Factor) on a predictor indicate?", options:["The predictor has too many missing values","Multicollinearity — the predictor is highly correlated with other predictors, inflating coefficient variance","The predictor is not statistically significant","The dependent variable is skewed"], correct:1,
+      explain:{right:"A high VIF (commonly flagged above 5 or 10) indicates that a predictor can be well-explained by a linear combination of the other predictors — multicollinearity. This inflates the standard errors of coefficient estimates, making them unstable and hard to interpret individually, even though overall model predictions may still be fine.", wrong:["VIF has nothing to do with missing values; it's purely about inter-predictor correlation structure.","Significance is assessed via p-values on coefficients, a separate diagnostic from VIF, though high VIF can indirectly make significance tests unreliable.","Skewness of the dependent variable is a different diagnostic concern, typically checked via residual plots or Q-Q plots, not VIF."]}},
+    {difficulty:"hard", q:"Why is the Central Limit Theorem (CLT) so important in inferential statistics?", options:["It proves all data is normally distributed","It states that the sampling distribution of the sample mean approaches a normal distribution as sample size grows, regardless of the population's original distribution","It only applies to small sample sizes","It eliminates the need for confidence intervals"], correct:1,
+      explain:{right:"The CLT says that regardless of the shape of the original population distribution, the distribution of sample means (across many samples) approaches a normal distribution as sample size increases — this is what justifies using normal-based methods (like z-tests and confidence intervals) on sample means even when the underlying data isn't normal.", wrong:["The CLT says nothing about individual raw data being normal — only the sampling distribution of the mean (or other statistics) tends toward normality.","The CLT's approximation generally improves with larger samples (often n≥30 is cited as a rule of thumb), the opposite of being a small-sample result.","The CLT is actually the theoretical foundation that makes many confidence interval calculations valid in the first place, not a replacement for them."]}},
+    {difficulty:"hard", q:"You're told a dataset is right-skewed (positively skewed). What's typically true about the relationship between its mean and median?", options:["Mean equals median exactly","Mean is greater than median","Mean is less than median","No relationship can be inferred from skew alone"], correct:1,
+      explain:{right:"In a right-skewed distribution, a long tail of high values pulls the mean upward more than the median (which is robust to the tail's exact magnitude), so typically mean > median.", wrong:["Mean equals median is the expected pattern only for a perfectly symmetric distribution, not a skewed one.","This describes a left-skewed (negatively skewed) distribution, where the long tail of low values pulls the mean below the median — the reverse of what's stated.","While not a strict mathematical law for every possible distribution, this mean-vs-median relationship is a standard and reliable heuristic taught for interpreting skew, so it's the best answer here."]}},
+  ]
+},
+ml: {
+  label: "Machine Learning",
+  icon: "ti-robot",
+  color: "c-purple",
+  questions: [
+    {difficulty:"easy", q:"What's the main difference between supervised and unsupervised learning?", options:["Supervised learning uses labeled data with known outcomes; unsupervised learning finds patterns in unlabeled data","Supervised learning is always more accurate","Unsupervised learning requires a target variable","There is no real difference"], correct:0,
+      explain:{right:"Supervised learning trains on data where each example has a known correct output (label), like predicting house prices from past sales data. Unsupervised learning works with unlabeled data, looking for structure like clusters or patterns without a predefined target.", wrong:["Accuracy depends entirely on the problem and data — neither approach is inherently 'more accurate' since they solve different kinds of problems.","It's the opposite: unsupervised learning specifically does NOT use a target variable; that's the defining feature of supervised learning.","These are fundamentally different learning paradigms with different goals, algorithms, and evaluation methods."]}},
+    {difficulty:"easy", q:"In a classification problem, what does 'overfitting' mean?", options:["The model performs well on training data but poorly on new, unseen data","The model performs poorly on both training and test data","The model trains too quickly","The model has too few features"], correct:0,
+      explain:{right:"Overfitting happens when a model learns the training data too specifically, including its noise and quirks, so it captures patterns that don't generalize to new data — strong training performance, weak test performance.", wrong:["Poor performance on both sets describes underfitting, the opposite problem.","Training speed is unrelated to the overfitting/underfitting concept.","Too few features more commonly contributes to underfitting (model too simple), not overfitting."]}},
+    {difficulty:"easy", q:"Which metric is most appropriate for evaluating a regression model's prediction error in the same units as the target variable?", options:["Accuracy","R² score","Root Mean Squared Error (RMSE)","Precision"], correct:2,
+      explain:{right:"RMSE takes the square root of the average squared errors, which brings the error metric back into the same units as the original target variable, making it interpretable (e.g., 'off by ₹5,000 on average').", wrong:["Accuracy is a classification metric (percentage of correct class predictions), not applicable to continuous regression targets.","R² is a unitless measure of variance explained (0 to 1, roughly), not an error measure in the target's original units.","Precision is a classification metric measuring the proportion of true positives among predicted positives — irrelevant for regression."]}},
+    {difficulty:"easy", q:"What is the purpose of a train-test split in machine learning?", options:["To make the dataset smaller for faster processing","To evaluate how well a model generalizes to data it hasn't seen during training","To remove outliers from the data","To convert categorical variables to numeric"], correct:1,
+      explain:{right:"By holding out a test set the model never sees during training, you get an honest estimate of how the model will perform on new, real-world data — directly testing generalization rather than memorization.", wrong:["Reducing dataset size is a side effect, not the actual purpose — the goal is unbiased evaluation, not speed.","Outlier removal is a separate data cleaning step, unrelated to train-test splitting.","Encoding categorical variables is handled by techniques like one-hot encoding, a different preprocessing step entirely."]}},
+    {difficulty:"easy", q:"Which of these is an example of a classification algorithm?", options:["Linear Regression","Logistic Regression","K-Means Clustering","Principal Component Analysis"], correct:1,
+      explain:{right:"Despite the word 'regression' in its name, Logistic Regression is used for classification — it predicts the probability of a categorical outcome (e.g., yes/no, fraud/not fraud).", wrong:["Linear Regression predicts a continuous numeric value, making it a regression algorithm, not classification.","K-Means is an unsupervised clustering algorithm with no labeled classes to predict.","PCA is a dimensionality reduction technique, not a predictive algorithm at all."]}},
+    {difficulty:"moderate", q:"Why might you choose Random Forest over a single Decision Tree for a prediction task?", options:["Random Forest always trains faster than a single tree","Random Forest reduces overfitting by averaging predictions across many trees trained on different data/feature subsets","A single Decision Tree cannot handle numeric features","Random Forest doesn't require any data preprocessing"], correct:1,
+      explain:{right:"Random Forest builds many decision trees, each trained on a bootstrapped sample of the data and a random subset of features, then averages (regression) or votes (classification) across them. This ensemble approach reduces the variance/overfitting that a single deep decision tree is prone to.", wrong:["Training many trees is computationally more expensive than training one, so Random Forest is typically slower to train, not faster.","Decision Trees handle numeric features natively just fine — this isn't a limitation that Random Forest solves.","Random Forest still benefits from reasonable data cleaning; it's just more robust to some issues like feature scaling (not requiring normalization), but it's not preprocessing-free."]}},
+    {difficulty:"moderate", q:"What does the 'bias-variance tradeoff' describe?", options:["A tradeoff between model speed and accuracy","Simple models tend to have high bias and low variance; complex models tend to have low bias and high variance, and you must balance the two for best generalization","Bias only matters in classification problems","It only applies to neural networks"], correct:1,
+      explain:{right:"Simple models (e.g., linear regression on complex data) underfit, having high bias (systematic error) but low variance (consistent across different training sets). Complex models (e.g., deep trees) can fit training data very closely (low bias) but vary wildly with different training samples (high variance/overfitting). The goal is finding the sweet spot that minimizes total error.", wrong:["This tradeoff is about prediction error sources (underfitting vs overfitting), not directly about computational speed.","Bias and variance are general statistical learning concepts that apply equally to regression and classification.","The bias-variance tradeoff is a universal concept across virtually all supervised learning models, not specific to neural networks."]}},
+    {difficulty:"moderate", q:"In a binary classification problem with a highly imbalanced dataset (95% class A, 5% class B), why is accuracy a poor primary metric?", options:["Accuracy can't be computed for imbalanced data","A model that always predicts class A would get 95% accuracy while being useless at identifying class B","Accuracy only works for regression","Imbalanced data always causes errors in Python"], correct:1,
+      explain:{right:"With a 95/5 split, a trivial model that ignores the minority class entirely and always predicts the majority class would still score 95% accuracy, masking the fact that it never correctly identifies any class B cases — exactly the cases you usually care about most (e.g., fraud, disease). Metrics like precision, recall, F1, or AUC-ROC are more informative here.", wrong:["Accuracy can always be computed mathematically — the issue is that the number is misleading, not that it's uncomputable.","Accuracy is fundamentally a classification metric; it doesn't apply to regression problems at all, so this option is backwards.","Imbalance is a statistical/modeling challenge, not a software error — Python itself handles imbalanced data without crashing."]}},
+    {difficulty:"moderate", q:"What is the purpose of k-fold cross-validation?", options:["To increase the size of the training dataset artificially","To get a more robust estimate of model performance by training/testing on multiple different splits of the data","To remove the need for a test set entirely in production","To speed up model training"], correct:1,
+      explain:{right:"k-fold cross-validation splits the data into k parts, trains on k-1 of them and tests on the remaining one, rotating through all k combinations. Averaging performance across all folds gives a more reliable, less split-dependent estimate of how well the model generalizes than a single train-test split.", wrong:["Cross-validation doesn't create new data; it reuses the same data in different combinations of train/validation splits.","A separate, untouched final test set is still best practice in production workflows even when cross-validation is used during model development.","Cross-validation actually requires training the model multiple times (once per fold), making it more computationally expensive, not faster."]}},
+    {difficulty:"hard", q:"You're predicting delivery time (a regression task) and notice your XGBoost model has much lower training error than a Linear Regression model, but similar test error. What does this suggest?", options:["XGBoost is strictly a better algorithm in every case","XGBoost may be overfitting more to the training data, while both models generalize similarly on unseen data — the gap between train and test error for XGBoost is a warning sign","Linear Regression is broken","You should always pick the model with lower training error"], correct:1,
+      explain:{right:"A large gap between training error and test error for XGBoost (low training error, but test error on par with a much simpler model) is a classic overfitting signature — the complex model is memorizing training patterns that don't transfer, while still ending up no better in real-world (test) performance than the simpler baseline.", wrong:["No algorithm is universally best — model choice depends on data size, structure, and the specific problem; XGBoost's strong training performance here doesn't translate to better generalization.","Linear Regression isn't broken; it's simply a simpler model that, in this scenario, generalizes about as well as the more complex one.","Training error should never be the sole basis for model selection — test (or cross-validated) performance is what actually matters for real-world use."]}},
+    {difficulty:"hard", q:"What's the key difference between L1 (Lasso) and L2 (Ridge) regularization?", options:["L1 can shrink coefficients exactly to zero (enabling feature selection), L2 shrinks coefficients toward zero but rarely to exactly zero","L1 and L2 are mathematically identical","L2 is used only for classification, L1 only for regression","L1 always performs worse than L2"], correct:0,
+      explain:{right:"L1 regularization adds a penalty proportional to the absolute value of coefficients, which geometrically tends to push some coefficients exactly to zero — effectively performing automatic feature selection. L2 adds a penalty proportional to the square of coefficients, which shrinks all coefficients smoothly toward zero but rarely makes them exactly zero.", wrong:["They use different penalty formulas (absolute value vs squared) and produce meaningfully different coefficient behavior — they are not the same.","Both L1 and L2 regularization can be applied to regression and classification models (e.g., Logistic Regression supports both); they aren't restricted by task type.","Neither is universally better — the right choice depends on whether you want sparse/feature-selecting models (L1) or smoother coefficient shrinkage without elimination (L2), and the data's actual structure."]}},
+    {difficulty:"hard", q:"In gradient boosting, what does the 'learning rate' hyperparameter control?", options:["How many trees are built in total","How much each individual tree's prediction contributes to the overall ensemble prediction, with smaller values requiring more trees but often improving generalization","The maximum depth of each tree","The percentage of data used for training"], correct:1,
+      explain:{right:"The learning rate scales down the contribution of each new tree added to the ensemble. A smaller learning rate means each tree corrects errors more conservatively, usually requiring more trees (higher n_estimators) to reach the same fit, but often resulting in better generalization than a high learning rate that converges fast but can overshoot and overfit.", wrong:["The number of trees is controlled by a separate hyperparameter (often called n_estimators), not the learning rate itself, though the two interact.","Tree depth is governed by parameters like max_depth, a separate structural hyperparameter.","Data split proportions are controlled during train_test_split or cross-validation setup, unrelated to the learning rate."]}},
+  ]
+},
+viz: {
+  label: "EDA, Excel & Power BI",
+  icon: "ti-chart-bar",
+  color: "c-amber",
+  questions: [
+    {difficulty:"easy", q:"What is the primary goal of Exploratory Data Analysis (EDA)?", options:["To build the final predictive model","To understand the data's structure, patterns, anomalies, and relationships before deeper analysis or modeling","To clean all missing values automatically","To deploy a dashboard"], correct:1,
+      explain:{right:"EDA is the investigative phase where you summarize, visualize, and probe a dataset to understand its distributions, relationships between variables, outliers, and quality issues — this understanding informs every decision that follows, including modeling choices.", wrong:["Model building is a later step that EDA informs, not EDA's own goal.","EDA helps you identify missing values and decide a strategy, but it doesn't automatically clean them — that's a separate data preparation step.","Dashboard deployment is a reporting/communication activity, distinct from the analytical exploration EDA represents."]}},
+    {difficulty:"easy", q:"In Excel, which function would you use to look up a value in one column and return a corresponding value from another column?", options:["SUM()","VLOOKUP() or XLOOKUP()","COUNTIF()","CONCATENATE()"], correct:1,
+      explain:{right:"VLOOKUP (and the more modern, flexible XLOOKUP) searches for a value in one column and returns a corresponding value from another column in the same row — the classic Excel lookup tool.", wrong:["SUM() simply adds numeric values; it performs no lookup.","COUNTIF() counts cells matching a condition; it doesn't return a related value from another column.","CONCATENATE() joins text strings together; it has nothing to do with looking up related data."]}},
+    {difficulty:"easy", q:"In Power BI, what is the main purpose of a 'slicer' visual?", options:["To create a calculated column","To let users interactively filter the entire report by selecting values (e.g., a region or date range)","To merge two tables","To export data to Excel"], correct:1,
+      explain:{right:"A slicer is an on-report filter control that lets end users interactively narrow down what data is shown across all visuals on the page just by clicking or selecting values, like a region name or a date range.", wrong:["Calculated columns are created using DAX formulas in the data model, unrelated to slicers.","Merging tables is a Power Query (data transformation) operation, not something a slicer visual does.","Exporting data is a separate report feature, not the function of a slicer."]}},
+    {difficulty:"easy", q:"What does a box plot (box-and-whisker plot) primarily help you visualize?", options:["The exact value of every data point","The distribution's median, quartiles, and potential outliers","The correlation between two variables","The trend over time"], correct:1,
+      explain:{right:"A box plot shows the median (middle line), the interquartile range (the box, from 25th to 75th percentile), and whiskers extending to typical min/max values, with points beyond the whiskers flagged as potential outliers.", wrong:["Box plots summarize distributions; they intentionally don't show every individual raw value (a strip plot or scatter would do that).","Correlation between two variables is better shown with a scatter plot, not a box plot, which generally displays one variable's distribution at a time (or one per category).","Trends over time are better captured with a line chart; a box plot doesn't inherently show a time sequence."]}},
+    {difficulty:"easy", q:"Why would you create a pivot table in Excel or Power BI?", options:["To write SQL queries","To summarize and aggregate large datasets by rows and columns of your choosing, interactively","To clean duplicate values","To build a machine learning model"], correct:1,
+      explain:{right:"A pivot table lets you drag fields into rows, columns, and values to dynamically summarize (sum, count, average, etc.) a large raw dataset into a compact, readable summary table — without writing any formulas or code.", wrong:["Pivot tables are a no-code summarization tool, distinct from writing SQL queries (though they achieve similar aggregation goals).","Removing duplicates is a separate data cleaning operation (e.g., Excel's 'Remove Duplicates' feature), not what a pivot table does.","Pivot tables are for descriptive summarization, not predictive modeling."]}},
+    {difficulty:"moderate", q:"You notice a column of ages in your dataset has a maximum value of 999. What's the most likely explanation and appropriate first step?", options:["999 is a valid age and should be kept as-is","It's likely a data entry error or a placeholder for missing/unknown data; investigate the source and consider treating it as a missing value or correcting it","Immediately delete the entire dataset","Average it with all other values to smooth it out"], correct:1,
+      explain:{right:"An age of 999 is implausible for a real person and is a classic sign of a sentinel/placeholder value used by some systems to represent missing or unknown data. The right approach is to investigate (check the data source, see how common this value is) before deciding whether to treat it as NaN, recode it, or flag it for the data owner.", wrong:["Treating an obviously implausible value as valid would corrupt any downstream statistics (mean, etc.) that include it.","Deleting the entire dataset over one suspicious value is a drastic overreaction — the right move is targeted investigation and correction.","Averaging an outlier into other values doesn't fix anything; it just spreads the contamination from one suspicious value into your aggregate statistics."]}},
+    {difficulty:"moderate", q:"In Power BI, what is the difference between a calculated column and a measure?", options:["They are the same thing","A calculated column is computed row-by-row and stored in the table; a measure is computed dynamically based on the current filter/aggregation context", "Calculated columns are faster than measures in all cases","Measures can only use SUM()"], correct:1,
+      explain:{right:"A calculated column evaluates a DAX expression for every row at data refresh time and stores the result physically in the table (using more memory). A measure is computed on the fly at query time, dynamically responding to whatever filters, slicers, or grouping are currently applied in the report — making it far more flexible for aggregations like totals and ratios.", wrong:["They serve different purposes and have meaningfully different computation models and use cases — far from interchangeable.","Performance depends on context: measures are often more efficient for aggregations since they avoid storing redundant row-level data, contradicting a blanket claim that calculated columns are always faster.","Measures can use a wide range of DAX aggregation and logic functions (AVERAGE, COUNT, CALCULATE, custom logic, etc.), not just SUM()."]}},
+    {difficulty:"moderate", q:"What does a high number of missing values concentrated in one specific column (but not randomly distributed across rows) often suggest?", options:["The data is definitely corrupted beyond use","It might indicate a systematic issue, like that field not being collected for a certain time period, source, or customer segment — worth investigating before deciding how to handle it","You should immediately drop that column without analysis","It has no impact on any analysis"], correct:1,
+      explain:{right:"When missingness is concentrated rather than random, it's often 'Missing Not At Random' (MNAR) — for example, a survey question added partway through data collection, or a field only populated by certain regional offices. Understanding why the data is missing should guide whether you impute, exclude, or flag it, rather than treating all missingness the same way.", wrong:["Concentrated missingness is informative, not necessarily a sign of irrecoverable corruption — it can often be explained and handled appropriately.","Dropping a column outright without first understanding the missingness pattern risks losing a column that might still carry useful signal once the cause is understood.","Missingness patterns can meaningfully bias any analysis or model trained on that column if not properly accounted for — it absolutely can have an impact."]}},
+    {difficulty:"hard", q:"In Power BI's data model, what's the main risk of creating a many-to-many relationship between two tables without careful design?", options:["Power BI will not allow it under any circumstance","It can cause ambiguous filter propagation and lead to incorrect or inflated aggregation results if not modeled carefully (e.g., via a bridge table)","It always makes reports load faster","It automatically converts to a one-to-many relationship"], correct:1,
+      explain:{right:"Many-to-many relationships can cause filters to propagate in unexpected or ambiguous ways, sometimes leading to double-counting or inflated totals if the underlying grain of the data isn't carefully considered. Best practice is often to use a bridge/junction table to model many-to-many relationships explicitly and control filter direction.", wrong:["Power BI does support many-to-many relationships natively (especially in recent versions), so this isn't an outright restriction.","Many-to-many relationships typically add computational complexity for the query engine, often slowing things down rather than speeding them up.","Power BI does not automatically restructure your relationship cardinality — that requires explicit data modeling intervention by the report builder."]}},
+    {difficulty:"hard", q:"You're given a dataset of 27,000 customers and asked to find what's driving revenue. Which initial EDA approach is most efficient?", options:["Manually inspect every single row in Excel one at a time","Segment by key categorical variables (e.g., age group, channel, region) and compare aggregate revenue/contribution across segments before diving deeper", "Immediately build a complex ML model without exploring the data","Only look at the overall total revenue number"], correct:1,
+      explain:{right:"With a large dataset, segmenting by meaningful business dimensions (age group, channel, region, etc.) and comparing aggregated metrics surfaces which segments drive the most value efficiently — this is exactly the kind of insight that led to identifying things like a specific age group or channel as a top revenue driver in real dashboard projects.", wrong:["Manually inspecting 27,000 individual rows is impractical and wouldn't reveal aggregate patterns efficiently — that's what aggregation and visualization are for.","Jumping straight to complex modeling without first understanding the data's structure and key drivers risks building a model on a flawed or incomplete understanding of the problem.","Looking only at the single overall total gives you no breakdown of which factors or segments are actually contributing to that total — it would miss the entire point of driver analysis."]}},
+    {difficulty:"hard", q:"In Excel, what is the key advantage of using a structured Table (Insert > Table) over a plain cell range for your raw data?", options:["Tables look more colorful by default","Tables auto-expand formulas and named ranges as new rows are added, and integrate cleanly with PivotTables and formulas using structured references", "Tables are required for charts to work at all","There is no functional difference"], correct:1,
+      explain:{right:"Excel Tables automatically extend formulas, formatting, and named ranges as you add new rows, and they support structured references (e.g., Table1[Sales]) which make formulas more readable and robust to row insertions — this is a meaningful, practical workflow advantage over static ranges.", wrong:["Visual styling is a cosmetic side effect and not the actual functional reason analysts use Tables.","Charts work fine on both Tables and plain ranges; Tables simply make charts and other features auto-update more gracefully as data grows.","There are real functional differences in auto-expansion, structured references, and PivotTable source stability — this isn't a cosmetic-only choice."]}},
+  ]
+},
+business: {
+  label: "Case & Business Reasoning",
+  icon: "ti-bulb",
+  color: "c-pink",
+  questions: [
+    {difficulty:"easy", q:"A stakeholder asks you to 'analyze why sales dropped last quarter.' What should be your first step?", options:["Immediately build a predictive model","Clarify the specific question: which product, region, time comparison, and what 'dropped' means (vs last quarter? vs forecast? vs last year?)","Just report the total sales number","Ignore the request since it's too vague"], correct:1,
+      explain:{right:"Vague business questions need to be scoped before any analysis starts. Clarifying the exact comparison baseline, scope (product/region), and definition of 'dropped' ensures you analyze the right thing and avoid wasted effort or a mismatched answer.", wrong:["Jumping to modeling before understanding the actual question risks solving the wrong problem entirely.","A single total number doesn't answer 'why' anything happened — the request is specifically about explanation, not just a figure.","Vague requests are extremely common in real analyst work; the skill is to clarify and scope, not to ignore them."]}},
+    {difficulty:"easy", q:"What's the difference between a KPI (Key Performance Indicator) and a regular metric?", options:["There is no difference","A KPI is a metric specifically tied to strategic goals or business objectives that leadership tracks closely; not every metric qualifies as a KPI","KPIs can only be percentages","Metrics are always more important than KPIs"], correct:1,
+      explain:{right:"Any number you can measure is a metric (e.g., number of page scrolls), but a KPI is specifically chosen because it's tightly linked to a core business objective (e.g., monthly revenue, customer churn rate) and is actively monitored to judge performance against goals.", wrong:["The distinction matters in practice — businesses define a curated set of KPIs precisely to avoid drowning in every possible metric.","KPIs can be any unit relevant to the goal — counts, currency, ratios, time durations — not just percentages.","This has it backwards; KPIs are generally considered the more strategically important subset of all possible metrics."]}},
+    {difficulty:"easy", q:"Why is it important to clearly communicate data insights to non-technical stakeholders?", options:["It isn't important; technical accuracy is all that matters","Because decisions are made by people who need to understand the 'so what' of the analysis, not just the technical methodology","Stakeholders always understand SQL and Python","Visualizations are purely decorative"], correct:1,
+      explain:{right:"Analysis only creates value when it leads to a decision or action. Non-technical stakeholders need the implications and recommendations translated into business language they can act on — the best analysis is wasted if it can't be understood and used.", wrong:["Technical accuracy matters, but if the insight can't be understood or acted upon, its business value is lost — communication is part of the job, not separate from it.","Most business stakeholders (executives, managers, clients) typically do not read code or queries directly; that's exactly why translation into clear language and visuals matters.","Good visualizations serve a functional communication purpose — making patterns and comparisons easier to grasp quickly — not just aesthetics."]}},
+    {difficulty:"moderate", q:"Your Power BI dashboard shows the 31-40 age group drives the most revenue. A stakeholder asks 'should we focus all marketing budget on this group?' What's the most thoughtful response?", options:["Yes, immediately shift 100% of budget to that group", "Investigate further: is this group also the most profitable (not just highest revenue), is it growing or saturated, and what's the risk of over-concentrating budget versus diversifying", "No, ignore the data entirely and trust intuition", "Refuse to answer since it's a business decision"], correct:1,
+      explain:{right:"Revenue share alone doesn't tell you about profitability, growth potential, acquisition cost, or risk concentration. A good analyst surfaces the relevant follow-up questions and additional data needed (margins, growth trend, customer lifetime value, diminishing returns) before recommending a major resource reallocation.", wrong:["Committing 100% of budget based on one dimension (revenue share) ignores profitability, risk diversification, and growth potential — a common pitfall of over-indexing on a single metric.","Dismissing a clear data signal in favor of pure intuition wastes the value of the analysis that was just done.","Part of an analyst's job is to support decision-making with context and recommendations, even though the final call belongs to business leadership — providing a thoughtful framework isn't refusing to engage."]}},
+    {difficulty:"moderate", q:"You're asked to 'predict customer churn.' What's a key early question to ask before building any model?", options:["What programming language should I use?","How is 'churn' actually defined for this business (e.g., no purchase in 90 days, subscription cancellation), and what would the business do differently once it has the prediction?", "What's the prettiest visualization library available?", "How many GPUs are available?"], correct:1,
+      explain:{right:"Without a precise, agreed-upon definition of churn, you risk building a model that predicts the wrong thing entirely. Equally important is understanding the planned action — if the business can't or won't act differently based on the prediction, the project may not be worth the investment. Both questions ground the technical work in actual business value.", wrong:["Tooling choice is a downstream implementation detail, not a foundational question that shapes whether the project is even well-defined.","Visualization choice is a presentation detail, irrelevant to defining the core prediction problem.","Compute resources are a scaling/implementation concern that comes much later, after the problem itself is properly scoped."]}},
+    {difficulty:"moderate", q:"A manager asks for a dashboard 'with everything in it.' What's the best approach?", options:["Build literally every chart you can think of into one page","Push back constructively: ask what specific decisions the dashboard needs to support, then design around those key questions rather than maximizing chart count", "Refuse the request entirely", "Just copy a template you found online"], correct:1,
+      explain:{right:"A dashboard crammed with every possible chart becomes unusable — important signals get buried in noise. The professional approach is to understand the actual decisions or questions the dashboard needs to support, then design a focused set of visuals around those, possibly with drill-down pages for less critical detail.", wrong:["An 'everything' dashboard typically becomes cluttered, slow, and hard to act on — more isn't better when it comes to decision-support tools.","Declining to engage at all misses the chance to guide the requester toward a more useful outcome through clarifying questions.","Copying a generic template ignores this specific business's actual goals, data, and decisions — it's unlikely to fit the real need."]}},
+    {difficulty:"hard", q:"Two regions show identical average revenue per customer, but Region A has much higher variance than Region B. What's the business implication worth raising?", options:["There is no meaningful difference since averages match","Region A's revenue is less predictable/consistent — perhaps driven by a few large customers — which has implications for forecasting reliability and risk concentration, even though the average matches Region B","Variance is just a technical statistic with no business relevance","Region B must be performing worse"], correct:1,
+      explain:{right:"Identical averages can hide very different underlying realities. High variance in Region A might mean revenue is concentrated in a few large accounts (forecasting risk if one leaves) or highly volatile month to month, while Region B's lower variance suggests more stable, broadly distributed revenue — both worth flagging for planning and risk management even though the simple average looks the same.", wrong:["Averages alone can mask important risk and stability differences — this is exactly the kind of insight a sharp analyst should surface rather than stopping at the mean.","Variance directly informs business decisions like forecasting confidence, risk diversification, and dependency on a small number of large customers — it's highly business-relevant.","Region B isn't necessarily 'worse' — it may actually be healthier from a risk/stability standpoint despite having the same average revenue, since its performance is more consistent."]}},
+    {difficulty:"hard", q:"You built a model predicting delivery time with strong accuracy in testing, but after deployment, operations reports it's frequently wrong during monsoon season. What's the most likely issue?", options:["The model's code has a syntax error", "Training data likely didn't adequately represent monsoon-season conditions (e.g., weather-related delays), so the model is encountering a distribution it wasn't trained on — a data/concept drift issue", "Accuracy metrics are meaningless in production", "The model should be deleted and never used again"], correct:1,
+      explain:{right:"If monsoon conditions (heavy rain, flooding, traffic disruption) were underrepresented or absent in the historical training data, the model never learned those patterns, so its predictions break down when real-world conditions shift outside what it saw during training — a classic case of distribution shift or concept drift that's common in real-world deployed models.", wrong:["A syntax error would typically cause the code to fail to run at all, not produce systematically wrong-but-running predictions tied to a specific season.","Accuracy metrics from proper testing are meaningful for the conditions they were tested under — the issue here is a mismatch between training conditions and a new real-world scenario, not that metrics are useless in general.","Wholesale abandonment is an overreaction; the appropriate fix is usually retraining with seasonal data, adding weather-related features, or building a separate seasonal adjustment — common, fixable real-world ML maintenance work."]}},
+    {difficulty:"hard", q:"Leadership wants to cut the data team's reporting time. You discover 80% of requests are slight variations of 5 core report types. What's the best recommendation?", options:["Hire more analysts to handle the volume manually", "Build standardized, parameterized/self-service dashboards (e.g., in Power BI) for those 5 core report types so stakeholders can self-serve common variations, freeing analyst time for higher-value ad hoc work", "Tell stakeholders to stop requesting reports", "Ignore the pattern since each request feels unique"], correct:1,
+      explain:{right:"Recognizing that most demand clusters around a small number of report 'shapes' is exactly the kind of pattern that justifies investing in reusable, filterable self-service dashboards. This scales analyst capacity without proportionally scaling headcount, and frees skilled analysts for genuinely novel, high-value analysis instead of repetitive manual report generation.", wrong:["Adding headcount to handle a fundamentally repetitive, automatable workload is an expensive, non-scalable fix when a better technical solution (self-service dashboards) is available.","Refusing legitimate business requests is not a constructive solution and would damage trust with stakeholders who have real reporting needs.","Treating each request as unique when 80% are variations of the same 5 patterns misses an efficiency opportunity that directly addresses the leadership's stated goal."]}},
+  ]
+},
+};
+</script>
+<script>
+/* ---------------- state ---------------- */
+const state = {
+  sectionKey: null,
+  difficulty: null,      // 'easy' | 'moderate' | 'hard' | 'mixed'
+  queue: [],              // array of {sectionKey, q}
+  index: 0,
+  selected: null,
+  answered: false,
+  results: [],            // {q, correct, chosenIdx}
+};
+
+const progress = {}; // sectionKey -> {attempted:Set(indices), correct:Set(indices)}
+let bestStreak = 0;
+let currentStreak = 0;
+
+function initProgress(){
+  Object.keys(QUESTION_BANK).forEach(k=>{
+    progress[k] = {attempted:new Set(), correct:new Set()};
+  });
+}
+initProgress();
+
+/* ---------------- icons (tiny inline glyphs, no external deps) ---------------- */
+const ICONS = {
+  "ti-database":"◧","ti-brand-python":"◎","ti-chart-histogram":"▥","ti-robot":"◈","ti-chart-bar":"▦","ti-bulb":"✦"
+};
+
+/* ---------------- screen routing ---------------- */
+function showScreen(id){
+  document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active'));
+  document.getElementById(id).classList.add('active');
+  window.scrollTo({top:0, behavior:'instant'});
+}
+
+function goHome(){
+  renderHome();
+  showScreen('screen-home');
+}
+
+/* ---------------- home rendering ---------------- */
+function renderHome(){
+  let totalAttempted = 0, totalCorrect = 0;
+  Object.values(progress).forEach(p=>{
+    totalAttempted += p.attempted.size;
+    totalCorrect += p.correct.size;
+  });
+  const totalQuestions = Object.values(QUESTION_BANK).reduce((a,s)=>a+s.questions.length,0);
+
+  document.getElementById('statAttempted').textContent = totalAttempted;
+  document.getElementById('statAccuracy').textContent = totalAttempted ? Math.round(100*totalCorrect/totalAttempted)+'%' : '—';
+  document.getElementById('statStreak').textContent = bestStreak;
+  document.getElementById('globalProgress').textContent = `${totalAttempted} / ${totalQuestions} attempted`;
+
+  const grid = document.getElementById('sectionGrid');
+  grid.innerHTML = '';
+  Object.entries(QUESTION_BANK).forEach(([key, sec], i)=>{
+    const p = progress[key];
+    const total = sec.questions.length;
+    const mastery = p.attempted.size ? Math.round(100*p.correct.size/p.attempted.size) : null;
+    const card = document.createElement('button');
+    card.className = 'section-card';
+    card.onclick = ()=>openDifficultyPicker(key);
+    card.innerHTML = `
+      <span class="section-num">${String(i+1).padStart(2,'0')}</span>
+      <span class="section-icon">${ICONS[sec.icon]||'•'}</span>
+      <span class="section-body">
+        <p class="section-name">${sec.label}</p>
+        <p class="section-meta">${total} questions · Easy, Moderate, Hard</p>
+      </span>
+      <span class="section-mastery">${mastery===null?'<span class="pct">—</span>not started':'<span class="pct">'+mastery+'%</span>mastery'}</span>
+      <span class="section-arrow">→</span>
+    `;
+    grid.appendChild(card);
+  });
+}
+
+/* ---------------- difficulty picker ---------------- */
+function openDifficultyPicker(sectionKey){
+  state.sectionKey = sectionKey;
+  const sec = QUESTION_BANK[sectionKey];
+  document.getElementById('diffSectionTitle').textContent = sec.label;
+
+  const counts = {easy:0, moderate:0, hard:0};
+  sec.questions.forEach(q=>counts[q.difficulty]++);
+
+  const wrap = document.getElementById('diffOptions');
+  wrap.innerHTML = '';
+
+  const defs = [
+    {key:'easy', name:'Easy', desc:'Foundational definitions and core concepts.'},
+    {key:'moderate', name:'Moderate', desc:'Applied understanding — typical first-round interview level.'},
+    {key:'hard', name:'Hard', desc:'Nuanced, multi-step reasoning — for senior or stretch interviews.'},
+  ];
+
+  defs.forEach(d=>{
+    const card = document.createElement('div');
+    card.className = 'diff-card';
+    card.onclick = ()=>startQuiz(sectionKey, d.key);
+    card.innerHTML = `
+      <div class="diff-left">
+        <span class="diff-dot ${d.key}"></span>
+        <div>
+          <p class="diff-name">${d.name}</p>
+          <p class="diff-desc">${d.desc}</p>
+        </div>
+      </div>
+      <span class="diff-count">${counts[d.key]} questions</span>
+    `;
+    wrap.appendChild(card);
+  });
+
+  const mixed = document.createElement('div');
+  mixed.className = 'diff-card mixed';
+  mixed.onclick = ()=>startQuiz(sectionKey, 'mixed');
+  mixed.innerHTML = `
+    <div class="diff-left">
+      <span class="diff-dot" style="background:linear-gradient(90deg,#5b8c5a,var(--amber),var(--wrong));"></span>
+      <div>
+        <p class="diff-name">Mixed set</p>
+        <p class="diff-desc">A shuffled run across all three difficulty levels.</p>
+      </div>
+    </div>
+    <span class="diff-count">${sec.questions.length} questions</span>
+  `;
+  wrap.appendChild(mixed);
+
+  showScreen('screen-difficulty');
+}
+
+/* ---------------- quiz flow ---------------- */
+function shuffle(arr){
+  const a = arr.slice();
+  for(let i=a.length-1;i>0;i--){
+    const j = Math.floor(Math.random()*(i+1));
+    [a[i],a[j]]=[a[j],a[i]];
+  }
+  return a;
+}
+
+function startQuiz(sectionKey, difficulty){
+  state.sectionKey = sectionKey;
+  state.difficulty = difficulty;
+  const sec = QUESTION_BANK[sectionKey];
+  let pool = sec.questions.map((q, idx)=>({q, idx}));
+  if(difficulty !== 'mixed'){
+    pool = pool.filter(item=>item.q.difficulty === difficulty);
+  }
+  state.queue = shuffle(pool);
+  state.index = 0;
+  state.results = [];
+  currentStreak = 0;
+  renderQuestion();
+  showScreen('screen-quiz');
+}
+
+function retrySameSet(){
+  startQuiz(state.sectionKey, state.difficulty);
+}
+
+function confirmExitQuiz(){
+  goHome();
+}
+
+function renderQuestion(){
+  state.selected = null;
+  state.answered = false;
+  const item = state.queue[state.index];
+  const q = item.q;
+  const sec = QUESTION_BANK[state.sectionKey];
+
+  document.getElementById('quizTag').textContent = sec.label + ' · ' + q.difficulty;
+  document.getElementById('qcount').textContent = `Question ${state.index+1} of ${state.queue.length}`;
+  document.getElementById('qbarFill').style.width = `${(state.index/state.queue.length)*100}%`;
+  document.getElementById('qtext').textContent = q.q;
+
+  const optWrap = document.getElementById('options');
+  optWrap.innerHTML = '';
+  const letters = ['A','B','C','D'];
+  q.options.forEach((opt, i)=>{
+    const el = document.createElement('button');
+    el.className = 'opt';
+    el.innerHTML = `<span class="letter">${letters[i]}</span><span>${opt}</span>`;
+    el.onclick = ()=>selectOption(i);
+    optWrap.appendChild(el);
+  });
+
+  document.getElementById('explainPanel').style.display = 'none';
+  document.getElementById('nextBtn').disabled = true;
+  document.getElementById('nextBtn').textContent = (state.index === state.queue.length-1) ? 'See results' : 'Next question';
+}
+
+function selectOption(i){
+  if(state.answered) return;
+  state.answered = true;
+  state.selected = i;
+
+  const item = state.queue[state.index];
+  const q = item.q;
+  const isCorrect = (i === q.correct);
+
+  progress[state.sectionKey].attempted.add(item.idx);
+  if(isCorrect){
+    progress[state.sectionKey].correct.add(item.idx);
+    currentStreak++;
+    bestStreak = Math.max(bestStreak, currentStreak);
+  } else {
+    currentStreak = 0;
+  }
+
+  state.results.push({q, chosenIdx:i, correct:isCorrect});
+
+  const opts = document.querySelectorAll('.opt');
+  opts.forEach((el, idx)=>{
+    el.classList.add('disabled');
+    el.onclick = null;
+    if(idx === q.correct) el.classList.add('reveal-correct');
+    if(idx === i && isCorrect) el.classList.add('selected-correct');
+    if(idx === i && !isCorrect) el.classList.add('selected-wrong');
+  });
+
+  const panel = document.getElementById('explainPanel');
+  panel.style.display = 'block';
+  panel.classList.toggle('is-wrong', !isCorrect);
+  document.getElementById('explainHead').textContent = isCorrect ? 'Why this is correct' : 'Why this is incorrect — and what is';
+  document.getElementById('explainRight').textContent = q.explain.right;
+
+  const othersList = document.getElementById('explainOthers');
+  othersList.innerHTML = '';
+  const letters = ['A','B','C','D'];
+  let wrongCursor = 0;
+  q.options.forEach((opt, idx)=>{
+    if(idx === q.correct) return;
+    const li = document.createElement('li');
+    li.innerHTML = `<span class="opt-label">${letters[idx]}</span>${q.explain.wrong[wrongCursor]}`;
+    othersList.appendChild(li);
+    wrongCursor++;
+  });
+
+  document.getElementById('nextBtn').disabled = false;
+  document.getElementById('qbarFill').style.width = `${((state.index+1)/state.queue.length)*100}%`;
+}
+
+function nextQuestion(){
+  if(state.index < state.queue.length-1){
+    state.index++;
+    renderQuestion();
+  } else {
+    renderResults();
+  }
+}
+
+/* ---------------- results ---------------- */
+function renderResults(){
+  const total = state.results.length;
+  const correct = state.results.filter(r=>r.correct).length;
+  const pct = Math.round(100*correct/total);
+
+  document.getElementById('resultScore').textContent = `${correct}/${total}`;
+  document.getElementById('resultLabel').textContent = `${pct}% correct — ${QUESTION_BANK[state.sectionKey].label}, ${state.difficulty}`;
+
+  let msg;
+  if(pct >= 85) msg = "Strong performance. You're at a level where you should feel confident fielding these in a live interview — consider trying the next difficulty tier or a different section.";
+  else if(pct >= 60) msg = "Solid foundation with some gaps. Review the explanations below for the ones you missed, then run this set again to lock them in.";
+  else msg = "This topic needs more groundwork before an interview. Go through every explanation carefully below — understanding the wrong options is just as valuable as knowing the right one.";
+  document.getElementById('resultMsg').textContent = msg;
+
+  const list = document.getElementById('reviewList');
+  list.innerHTML = '';
+  state.results.forEach((r, i)=>{
+    const div = document.createElement('div');
+    div.className = 'review-item';
+    div.innerHTML = `<span class="review-mark ${r.correct?'ok':'no'}">${r.correct?'✓':'✗'}</span><span class="review-q">${r.q.q}</span>`;
+    list.appendChild(div);
+  });
+
+  showScreen('screen-results');
+}
+
+/* ---------------- init ---------------- */
+renderHome();
+</script>
+</body>
+</html>
